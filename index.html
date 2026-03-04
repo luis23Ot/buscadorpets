@@ -207,6 +207,37 @@
             margin-bottom: 10px;
             font-style: italic;
         }
+        /* ==========================================
+           AJUSTES PARA CELULARES (DISEÑO RESPONSIVO)
+           ========================================== */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+                align-items: flex-start; /* Sube la caja un poco en celulares */
+                margin-top: 20px;
+            }
+            .header {
+                padding: 25px 20px;
+            }
+            .search-section {
+                padding: 20px;
+            }
+            .search-box {
+                flex-direction: column; /* Apila el buscador y el botón verticalmente */
+            }
+            button {
+                padding: 14px;
+                justify-content: center; /* Centra el texto y el ícono en el botón */
+                width: 100%;
+            }
+            .card-header {
+                flex-direction: column; /* Pone la versión debajo del título si no cabe */
+                gap: 5px;
+            }
+            .version-badge {
+                align-self: flex-start;
+            }
+        }
     </style>
 </head>
 <body>
@@ -326,4 +357,5 @@
     </script>
 </body>
 </html>
+
 
