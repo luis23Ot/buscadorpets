@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscador de PETS</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #eef2f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            width: 450px;
+            text-align: center;
+        }
+        input[type="text"] {
+            width: 85%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 22px;
+            border: none;
+            background: #1976d2;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: .3s;
+        }
+        button:hover {
+            background: #145a9c;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fb;
+            border-radius: 10px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto; /* Agregado por si hay muchos resultados */
+        }
+        .result-item {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .result h3 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 18px;
+        }
+        .version-tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .result p {
+            color: #555;
+            margin: 4px 0 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Buscador de Versiones PETS</h2>
+        <input type="text" id="searchInput" placeholder="Escribe el ID o nombre del PETS..." onkeyup="checkEnter(event)">
+        <button onclick="searchData()">Buscar</button>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Tu Google Sheet publicado como CSV:
+        const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvcMllPVy-RxADzwap-cCbUvLpUcxob7LAUyX8SZbkAwCoqU0-uZ9Mubmm_olLxLKVfJ-jbsKggMoU/pub?gid=0&single=true&output=csv";
+
+        let sheetData = [];
+
+        // Cargar y parsear CSV con PapaParse
+        Papa.parse(csvUrl, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                sheetData = results.data;
+                console.log("Datos cargados:", sheetData); // para verificar en consola
+            },
+            error: function(err) {
+                console.error("Error al cargar CSV:", err);
+                document.getElementById("result").innerHTML = "<p>⚠️ Error al conectar con la base de datos.</p>";
+            }
+        });
+
+        // Permite buscar al presionar la tecla Enter
+        function checkEnter(event) {
+            if (event.key === "Enter") {
+                searchData();
+            }
+        }
+
+        function searchData() {
+            const query = document.getElementById("searchInput").value.toLowerCase().trim();
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "";
+
+            if (!query) {
+                resultDiv.innerHTML = "<p>⚠️ Ingresa un ID o nombre para buscar</p>";
+                return;
+            }
+
+            // Filtra buscando coincidencias en ID o Tema
+            const matches = sheetData.filter(item => {
+                const idMatch = item.ID && item.ID.toString().toLowerCase().includes(query);
+                const temaMatch = item.Tema && item.Tema.toString().toLowerCase().includes(query);
+                return idMatch || temaMatch;
+            });
+
+            if (matches.length === 0) {
+                resultDiv.innerHTML = "<p>❌ No se encontraron coincidencias</p>";
+            } else {
+                matches.forEach(item => {
+                    // Busca la columna de versión (soporta diferentes nombres de cabecera)
+                    const version = item.Version || item.Versión || item.version || "No especificada";
+                    
+                    resultDiv.innerHTML += `
+                        <div class="result-item">
+                            <h3>${item.Tema || 'Sin título'}</h3>
+                            <div class="version-tag">Versión: ${version}</div>
+                            <p><strong>ID:</strong> ${item.ID || 'N/A'}</p>
+                            ${item.Frase ? `<p><em>${item.Frase}</em></p>` : ''}
+                        </div>
+                    `;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
