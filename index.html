@@ -2,94 +2,239 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Buscador de PETS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de PETS | Gestión de Mantenimiento</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
     <style>
+        :root {
+            --primary-color: #1e3a8a; /* Azul oscuro corporativo */
+            --secondary-color: #2563eb; /* Azul vibrante */
+            --bg-color: #f0f4f8; /* Gris azulado muy claro para el fondo */
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: #eef2f6;
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg-color);
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
-        .container {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            width: 450px;
+
+        .app-container {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 550px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 35px 30px;
             text-align: center;
         }
+
+        .header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            margin: 8px 0 0;
+            color: #dbeafe;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .search-section {
+            padding: 30px;
+            background: white;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
         input[type="text"] {
-            width: 85%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        button {
-            padding: 10px 22px;
-            border: none;
-            background: #1976d2;
-            color: #fff;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: .3s;
-        }
-        button:hover {
-            background: #145a9c;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fb;
+            flex: 1;
+            padding: 14px 16px;
             border-radius: 10px;
+            border: 2px solid var(--border-color);
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            padding: 0 24px;
+            border: none;
+            background: var(--secondary-color);
+            color: #fff;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background: var(--primary-color);
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        .result-container {
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* Estilo para la barra de scroll */
+        .result-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .result-container::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .result-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 12px;
             text-align: left;
-            max-height: 300px;
-            overflow-y: auto; /* Agregado por si hay muchos resultados */
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .result-item {
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
+
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+            border-left-color: var(--primary-color);
         }
-        .result-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            gap: 10px;
         }
-        .result h3 {
-            margin: 0 0 5px 0;
-            color: #333;
-            font-size: 18px;
+
+        .result-card h3 {
+            margin: 0;
+            color: var(--text-main);
+            font-size: 17px;
+            font-weight: 600;
+            line-height: 1.3;
         }
-        .version-tag {
+
+        .version-badge {
+            background: #dbeafe;
+            color: var(--secondary-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .id-badge {
             display: inline-block;
-            background: #e3f2fd;
-            color: #1976d2;
+            background: #f3f4f6;
+            color: var(--text-muted);
             padding: 4px 8px;
             border-radius: 6px;
-            font-weight: bold;
-            font-size: 14px;
-            margin-bottom: 5px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
-        .result p {
-            color: #555;
-            margin: 4px 0 0;
+
+        .result-card p {
+            color: var(--text-muted);
+            margin: 0;
             font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px;
+            font-size: 15px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .status-loading {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Buscador de Versiones PETS</h2>
-        <input type="text" id="searchInput" placeholder="Escribe el ID o nombre del PETS..." onkeyup="checkEnter(event)">
-        <button onclick="searchData()">Buscar</button>
-        <div class="result" id="result"></div>
+
+    <div class="app-container">
+        <div class="header">
+            <h2>Buscador de PETS</h2>
+            <p>Consulta rápida de Procedimientos y Versiones</p>
+        </div>
+
+        <div class="search-section">
+            <div id="loadingStatus" class="status-loading">Conectando con la base de datos...</div>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Ej. PETS-MANT-015, bomba, o solo '15'" onkeyup="checkEnter(event)">
+                <button onclick="searchData()">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    Buscar
+                </button>
+            </div>
+
+            <div class="result-container" id="result">
+                <div class="message">Ingresa un parámetro para comenzar la búsqueda.</div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -98,18 +243,20 @@
 
         let sheetData = [];
 
-        // Cargar y parsear CSV con PapaParse
+        // Cargar y parsear CSV
         Papa.parse(csvUrl, {
             download: true,
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
                 sheetData = results.data;
-                console.log("Datos cargados:", sheetData); // para verificar en consola
+                document.getElementById("loadingStatus").innerHTML = `✅ Base de datos lista (${sheetData.length} registros)`;
+                document.getElementById("loadingStatus").style.color = "#16a34a"; // Verde
             },
             error: function(err) {
                 console.error("Error al cargar CSV:", err);
-                document.getElementById("result").innerHTML = "<p>⚠️ Error al conectar con la base de datos.</p>";
+                document.getElementById("loadingStatus").innerHTML = "❌ Error al conectar con la base de datos.";
+                document.getElementById("loadingStatus").style.color = "#dc2626"; // Rojo
             }
         });
 
@@ -126,49 +273,51 @@
             resultDiv.innerHTML = "";
 
             if (!query) {
-                resultDiv.innerHTML = "<p>⚠️ Ingresa un ID o nombre para buscar</p>";
+                resultDiv.innerHTML = "<div class='message'>⚠️ Por favor, ingresa un ID o palabra clave.</div>";
                 return;
             }
 
-            // Filtra buscando coincidencias en ID o Tema
+            // Filtro inteligente (Separa números de letras)
             const matches = sheetData.filter(item => {
                 let idMatch = false;
+                let temaMatch = false;
                 
+                const esNumero = !isNaN(query) && query.trim() !== "";
+
                 if (item.ID) {
                     const idString = item.ID.toString().toLowerCase();
-                    
-                    // Si el usuario escribe solo un número (ej. "1")
-                    if (!isNaN(query) && query.trim() !== "") {
-                        // Extrae solo los números del ID de tu hoja (de "PETS-012" saca 12)
+                    if (esNumero) {
                         const numeroDelID = parseInt(idString.replace(/\D/g, ''), 10);
-                        // Compara matemáticamente: 1 es igual a 1
                         if (numeroDelID === parseInt(query, 10)) {
                             idMatch = true;
                         }
                     } else {
-                        // Si escribe letras (ej. "PETS" o "Bomba"), busca si el ID lo contiene
                         idMatch = idString.includes(query);
                     }
                 }
 
-                const temaMatch = item.Tema && item.Tema.toString().toLowerCase().includes(query);
+                if (!esNumero && item.Tema) {
+                    temaMatch = item.Tema.toString().toLowerCase().includes(query);
+                }
                 
                 return idMatch || temaMatch;
             });
 
+            // Mostrar resultados
             if (matches.length === 0) {
-                resultDiv.innerHTML = "<p>❌ No se encontraron coincidencias</p>";
+                resultDiv.innerHTML = "<div class='message'>❌ No se encontraron procedimientos con ese criterio.</div>";
             } else {
                 matches.forEach(item => {
-                    // Busca la columna de versión (soporta diferentes nombres de cabecera)
-                    const version = item.Version || item.Versión || item.version || "No especificada";
+                    const version = item.Version || item.Versión || item.version || "N/A";
                     
                     resultDiv.innerHTML += `
-                        <div class="result-item">
-                            <h3>${item.Tema || 'Sin título'}</h3>
-                            <div class="version-tag">Versión: ${version}</div>
-                            <p><strong>ID:</strong> ${item.ID || 'N/A'}</p>
-                            ${item.Frase ? `<p><em>${item.Frase}</em></p>` : ''}
+                        <div class="result-card">
+                            <div class="card-header">
+                                <h3>${item.Tema || 'Documento sin título'}</h3>
+                                <span class="version-badge">Ver. ${version}</span>
+                            </div>
+                            <span class="id-badge">${item.ID || 'Sin Código'}</span>
+                            ${item.Frase ? `<p>${item.Frase}</p>` : ''}
                         </div>
                     `;
                 });
@@ -176,5 +325,4 @@
         }
     </script>
 </body>
-
 </html>
