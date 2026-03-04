@@ -132,8 +132,27 @@
 
             // Filtra buscando coincidencias en ID o Tema
             const matches = sheetData.filter(item => {
-                const idMatch = item.ID && item.ID.toString().toLowerCase().includes(query);
+                let idMatch = false;
+                
+                if (item.ID) {
+                    const idString = item.ID.toString().toLowerCase();
+                    
+                    // Si el usuario escribe solo un número (ej. "1")
+                    if (!isNaN(query) && query.trim() !== "") {
+                        // Extrae solo los números del ID de tu hoja (de "PETS-012" saca 12)
+                        const numeroDelID = parseInt(idString.replace(/\D/g, ''), 10);
+                        // Compara matemáticamente: 1 es igual a 1
+                        if (numeroDelID === parseInt(query, 10)) {
+                            idMatch = true;
+                        }
+                    } else {
+                        // Si escribe letras (ej. "PETS" o "Bomba"), busca si el ID lo contiene
+                        idMatch = idString.includes(query);
+                    }
+                }
+
                 const temaMatch = item.Tema && item.Tema.toString().toLowerCase().includes(query);
+                
                 return idMatch || temaMatch;
             });
 
@@ -157,4 +176,5 @@
         }
     </script>
 </body>
+
 </html>
