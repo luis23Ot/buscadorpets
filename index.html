@@ -9,9 +9,9 @@
     
     <style>
         :root {
-            --primary-color: #1e3a8a; /* Azul oscuro corporativo */
-            --secondary-color: #2563eb; /* Azul vibrante */
-            --bg-color: #f0f4f8; /* Gris azulado muy claro para el fondo */
+            --primary-color: #1e3a8a; 
+            --secondary-color: #2563eb; 
+            --bg-color: #f0f4f8; 
             --card-bg: #ffffff;
             --text-main: #1f2937;
             --text-muted: #6b7280;
@@ -118,7 +118,6 @@
             padding-right: 5px;
         }
 
-        /* Estilo para la barra de scroll */
         .result-container::-webkit-scrollbar {
             width: 6px;
         }
@@ -207,13 +206,43 @@
             margin-bottom: 10px;
             font-style: italic;
         }
+
+        /* ==========================================
+           NUEVO: ESTILOS PARA EL BOTÓN DE PDF
+           ========================================== */
+        .card-footer {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-pdf {
+            background-color: #ef4444; /* Color rojo */
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none; 
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+
+        .btn-pdf:hover {
+            background-color: #dc2626; /* Rojo más oscuro al pasar el mouse */
+        }
+
         /* ==========================================
            AJUSTES PARA CELULARES (DISEÑO RESPONSIVO)
            ========================================== */
         @media (max-width: 600px) {
             body {
                 padding: 10px;
-                align-items: flex-start; /* Sube la caja un poco en celulares */
+                align-items: flex-start; 
                 margin-top: 20px;
             }
             .header {
@@ -223,15 +252,15 @@
                 padding: 20px;
             }
             .search-box {
-                flex-direction: column; /* Apila el buscador y el botón verticalmente */
+                flex-direction: column; 
             }
             button {
                 padding: 14px;
-                justify-content: center; /* Centra el texto y el ícono en el botón */
+                justify-content: center; 
                 width: 100%;
             }
             .card-header {
-                flex-direction: column; /* Pone la versión debajo del título si no cabe */
+                flex-direction: column; 
                 gap: 5px;
             }
             .version-badge {
@@ -341,6 +370,24 @@
                 matches.forEach(item => {
                     const version = item.Version || item.Versión || item.version || "N/A";
                     
+                    // NUEVO: Buscamos si hay un link en la columna "Enlace" del Excel
+                    const enlacePDF = item.Enlace || item.Link || "";
+                    let botonHTML = "";
+                    
+                    // Si el excel tiene un link guardado, armamos el botón rojo
+                    if (enlacePDF !== "") {
+                        botonHTML = `
+                        <div class="card-footer">
+                            <a href="${enlacePDF}" target="_blank" class="btn-pdf">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3zM4.5 6a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/>
+                                </svg>
+                                Abrir PDF
+                            </a>
+                        </div>`;
+                    }
+
+                    // Imprimimos la tarjeta completa
                     resultDiv.innerHTML += `
                         <div class="result-card">
                             <div class="card-header">
@@ -349,6 +396,7 @@
                             </div>
                             <span class="id-badge">${item.ID || 'Sin Código'}</span>
                             ${item.Frase ? `<p>${item.Frase}</p>` : ''}
+                            ${botonHTML}
                         </div>
                     `;
                 });
@@ -357,5 +405,3 @@
     </script>
 </body>
 </html>
-
-
