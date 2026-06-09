@@ -1,3 +1,8 @@
+Aquí tienes el código completo, unificado y listo para copiar y pegar.
+
+Lo único que debes hacer antes de usarlo es ir a la **línea 204** (casi al inicio del `<script>`) y reemplazar el texto `"PEGA_AQUI_TU_NUEVO_ENLACE_DE_OBSERVACIONES"` por la URL del Web App que acabas de generar.
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -116,7 +121,7 @@
             font-size: 14px;
         }
 
-        input[type="text"], select {
+        input[type="text"], input[type="file"], select {
             width: 100%;
             padding: 12px 15px;
             border-radius: 10px;
@@ -309,15 +314,39 @@
             </div>
             
             <div class="seccion-body">
-                <div class="mensaje" style="display:block; background:#fffbeb; color:#b45309;">
-                    🚧 Módulo en construcción. Aquí irá el formulario para reportar observaciones y hallazgos.
-                </div>
+                <label>Nombre del Reportante:</label>
+                <input type="text" id="reporte_nombre" placeholder="Ej: Juan Pérez">
+
+                <label>Descripción de la Observación / Hallazgo:</label>
+                <input type="text" id="reporte_descripcion" placeholder="Describa la condición insegura o avería...">
+
+                <label>Evidencias (Fotos o Video):</label>
+                <input type="file" id="reporte_evidencias" accept="image/*,video/*" multiple style="padding: 10px; border: 1px dashed var(--border-color); background: #f8fafc;">
+                <small style="color: var(--text-muted); display: block; margin-top: 5px;">Puedes subir hasta 4 imágenes o un video corto.</small>
+
+                <button id="btnEnviarObservacion" class="btn-accion" onclick="finalizarObservacion()">ENVIAR REPORTE</button>
+                
+                <div id="txtMensajeObservacion" class="mensaje"></div>
             </div>
         </div>
 
     </div>
 
     <script>
+        // ==========================================
+        // CONFIGURACIÓN DE CONEXIONES (URLs)
+        // ==========================================
+        
+        // ⚠️ Excel Original (Horas)
+        const URL_EXCEL_ONLINE = "https://script.google.com/macros/s/AKfycbzKuiAHOf867JZqwBN3bRCFiuZHlRZW0C3N_pu-KpbqEMmbRAj28kCJAi9gO-E7aJ7I/exec"; 
+        
+        // ⚠️ NUEVO Excel (Observaciones y Fotos) - PEGA TU ENLACE AQUÍ:
+        const URL_OBSERVACIONES_ONLINE = "https://script.google.com/macros/s/AKfycbwrzXWTtxe-5mGWJ8RUJ4ii0loYfhSUI2kKK2VF48WXrPTRfewv0tsZp6NtqGJdMYu8/exec"; 
+        
+        // ⚠️ CSV de PETS
+        const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvcMllPVy-RxADzwap-cCbUvLpUcxob7LAUyX8SZbkAwCoqU0-uZ9Mubmm_olLxLKVfJ-jbsKggMoU/pub?gid=0&single=true&output=csv";
+
+
         // ==========================================
         // LÓGICA GENERAL (NAVEGACIÓN)
         // ==========================================
@@ -331,11 +360,10 @@
             document.getElementById(idSeccionDestino).classList.add('contenedor-activo');
         }
 
-        // ==========================================
-        // LÓGICA DE SECCIÓN: REGISTRO DE HORAS
-        // ==========================================
-        const URL_EXCEL_ONLINE = "https://script.google.com/macros/s/AKfycbzKuiAHOf867JZqwBN3bRCFiuZHlRZW0C3N_pu-KpbqEMmbRAj28kCJAi9gO-E7aJ7I/exec"; 
 
+        // ==========================================
+        // LÓGICA DE SECCIÓN 1: REGISTRO DE HORAS
+        // ==========================================
         let maestroEquipos = {
             "ANTIINCRUSTANTE F1 - SALA QUIMICOS F1": ["P-902-F1", "P-902-F2"],
             "COMPRESOR DE AIRE CENTRAL": ["C-101-A"],
@@ -360,7 +388,6 @@
             txtMensaje.style.backgroundColor = fondo;
         }
 
-        // Inicializar datos de registro al cargar la ventana
         window.addEventListener('load', function() {
             const hoy = new Date();
             inputFecha.value = hoy.toLocaleDateString('es-PE');
@@ -368,7 +395,7 @@
             inputHoraInicio.value = ahora;
             inputHoraFin.value = ahora;
 
-            if (URL_EXCEL_ONLINE === "TU_URL_DE_APPS_SCRIPT_AQUI" || URL_EXCEL_ONLINE === "") {
+            if (URL_EXCEL_ONLINE === "" || URL_EXCEL_ONLINE.includes("TU_URL_DE_APPS_SCRIPT")) {
                 mostrarMensajeRegistro("Modo de prueba local activa.", "#856404", "#fff3cd");
                 inicializarBuscadores(maestroEquipos);
             } else {
@@ -486,7 +513,7 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(datosFinales)
             }).then(() => {
-                alert("¡Registro enviado y guardado correctamente!");
+                alert("¡Registro de horas guardado correctamente!");
                 limpiarFiltrosActivos();
                 inputArea.value = ""; 
                 const hoy = new Date();
@@ -505,9 +532,8 @@
 
 
         // ==========================================
-        // LÓGICA DE SECCIÓN: BUSCADOR DE PETS
+        // LÓGICA DE SECCIÓN 2: BUSCADOR DE PETS
         // ==========================================
-        const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvcMllPVy-RxADzwap-cCbUvLpUcxob7LAUyX8SZbkAwCoqU0-uZ9Mubmm_olLxLKVfJ-jbsKggMoU/pub?gid=0&single=true&output=csv";
         let sheetData = [];
 
         window.addEventListener('load', function() {
@@ -592,6 +618,82 @@
                 });
             }
         }
+
+
+        // ==========================================
+        // LÓGICA DE SECCIÓN 3: REPORTAR OBSERVACIÓN 
+        // ==========================================
+        async function finalizarObservacion() {
+            const nombre = document.getElementById("reporte_nombre").value.trim();
+            const descripcion = document.getElementById("reporte_descripcion").value.trim();
+            const inputFile = document.getElementById("reporte_evidencias");
+            const btnObservacion = document.getElementById("btnEnviarObservacion");
+            const txtMensajeObs = document.getElementById("txtMensajeObservacion");
+
+            if (URL_OBSERVACIONES_ONLINE === "PEGA_AQUI_TU_NUEVO_ENLACE_DE_OBSERVACIONES") {
+                return alert("⚠️ Falta configurar el enlace (URL_OBSERVACIONES_ONLINE) en el código HTML.");
+            }
+
+            if (!nombre || !descripcion) {
+                return alert("Por favor, ingrese su nombre y la descripción de la observación.");
+            }
+
+            btnObservacion.disabled = true;
+            txtMensajeObs.style.display = "block";
+            txtMensajeObs.innerText = "⏳ Procesando evidencias y enviando reporte...";
+            txtMensajeObs.style.color = "#856404";
+            txtMensajeObs.style.backgroundColor = "#fef08a";
+
+            // Convertir archivos a Base64
+            let archivosPromesas = Array.from(inputFile.files).map(file => {
+                return new Promise((resolve, reject) => {
+                    let reader = new FileReader();
+                    reader.onload = () => resolve({
+                        base64: reader.result.split(',')[1],
+                        mimeType: file.type,
+                        name: file.name
+                    });
+                    reader.onerror = error => reject(error);
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            try {
+                const evidenciasProcesadas = await Promise.all(archivosPromesas);
+
+                const datosReporte = {
+                    nombre: nombre,
+                    descripcion: descripcion,
+                    archivos: evidenciasProcesadas 
+                };
+
+                fetch(URL_OBSERVACIONES_ONLINE, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(datosReporte)
+                }).then(() => {
+                    alert("¡Observación y evidencias reportadas con éxito!");
+                    document.getElementById("reporte_nombre").value = "";
+                    document.getElementById("reporte_descripcion").value = "";
+                    inputFile.value = "";
+                    btnObservacion.disabled = false;
+                    txtMensajeObs.style.display = "none";
+                    mostrarSeccion('menuPrincipal');
+                }).catch(err => {
+                    alert("Error al enviar el reporte de observación.");
+                    btnObservacion.disabled = false;
+                    txtMensajeObs.style.display = "none";
+                });
+
+            } catch (error) {
+                console.error("Error al procesar archivos:", error);
+                alert("Ocurrió un error al cargar las fotos.");
+                btnObservacion.disabled = false;
+                txtMensajeObs.style.display = "none";
+            }
+        }
     </script>
 </body>
 </html>
+
