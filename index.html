@@ -1,9 +1,16 @@
+¡Listo! He fusionado ambos códigos en una sola aplicación web estructurada.
+
+He aplicado un diseño unificado y responsivo (ideal para celulares) para que ambas herramientas se sientan como parte de un mismo ecosistema. Ahora la página carga directamente en el **Menú Principal**, y desde ahí puedes navegar hacia el **Registro de Horas**, el **Buscador de PETS**, o la futura sección de **Observaciones**.
+
+Aquí tienes el código completo y unificado. Solo debes copiarlo y guardarlo como tu archivo `.html` final:
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buscador de PETS | Gestión de Mantenimiento</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>App de Mantenimiento | Campo</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
@@ -16,6 +23,8 @@
             --text-main: #1f2937;
             --text-muted: #6b7280;
             --border-color: #e5e7eb;
+            --success-color: #16a34a;
+            --danger-color: #dc2626;
         }
 
         body {
@@ -23,10 +32,10 @@
             background-color: var(--bg-color);
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             box-sizing: border-box;
         }
 
@@ -39,58 +48,104 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            margin-top: 10px;
         }
 
+        /* --- CONTROL DE SECCIONES --- */
+        .contenedor-oculto { display: none !important; }
+        .contenedor-activo { display: block; }
+
+        /* --- CABECERAS --- */
         .header {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
-            padding: 35px 30px;
+            padding: 25px 20px;
             text-align: center;
+            position: relative;
         }
 
-        .header h2 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
+        .header h2 { margin: 0; font-size: 22px; font-weight: 700; }
+        .header p { margin: 8px 0 0; color: #dbeafe; font-size: 14px; }
 
-        .header p {
-            margin: 8px 0 0;
-            color: #dbeafe;
-            font-size: 14px;
-            font-weight: 400;
-        }
-
-        .search-section {
-            padding: 30px;
-            background: white;
-        }
-
-        .search-box {
+        .btn-volver {
+            position: absolute;
+            top: 20px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.2s;
+        }
+        .btn-volver:hover { background: rgba(255, 255, 255, 0.3); }
+
+        /* --- MENÚ PRINCIPAL --- */
+        .menu-body { padding: 30px 20px; }
+        .botones-menu { display: flex; flex-direction: column; gap: 15px; }
+        
+        .btn-menu {
+            background-color: white;
+            color: var(--text-main);
+            border: 2px solid var(--border-color);
+            padding: 18px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .btn-menu:hover, .btn-menu:active {
+            border-color: var(--secondary-color);
+            background-color: #f8fafc;
+            transform: translateY(-2px);
+        }
+        .menu-icon { font-size: 24px; }
+
+        /* --- FORMULARIOS Y CONTENIDOS COMPARTIDOS --- */
+        .seccion-body { padding: 25px 20px; }
+        
+        label {
+            font-weight: 600;
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            color: var(--text-main);
+            font-size: 14px;
         }
 
-        input[type="text"] {
-            flex: 1;
-            padding: 14px 16px;
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px 15px;
             border-radius: 10px;
             border: 2px solid var(--border-color);
-            font-size: 16px;
+            font-size: 15px;
             font-family: inherit;
+            background-color: #fff;
+            color: var(--text-main);
             transition: all 0.3s ease;
-            outline: none;
+            box-sizing: border-box;
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus, select:focus {
+            outline: none;
             border-color: var(--secondary-color);
             box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
         }
 
-        button {
-            padding: 0 24px;
+        /* --- BOTONES DE ACCIÓN --- */
+        .btn-accion {
+            width: 100%;
+            padding: 14px;
             border: none;
             background: var(--secondary-color);
             color: #fff;
@@ -98,34 +153,35 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s, transform 0.1s;
+            transition: background 0.3s;
+            margin-top: 20px;
             display: flex;
+            justify-content: center;
             align-items: center;
             gap: 8px;
         }
+        .btn-accion:hover { background: var(--primary-color); }
+        .btn-accion:disabled { background: var(--text-muted); cursor: not-allowed; }
 
-        button:hover {
-            background: var(--primary-color);
+        .btn-secundario {
+            width: 100%;
+            background-color: #f1f5f9;
+            color: var(--text-muted);
+            border: none;
+            font-weight: 600;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 8px;
         }
 
-        button:active {
-            transform: scale(0.97);
-        }
+        /* --- BUSCADOR PETS ESPECÍFICO --- */
+        .search-box-pets { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-box-pets input { flex: 1; margin-top: 0; }
+        .search-box-pets button { margin-top: 0; width: auto; padding: 0 20px; }
 
-        .result-container {
-            max-height: 380px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .result-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .result-container::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 10px;
-        }
-
+        .result-container { max-height: 380px; overflow-y: auto; padding-right: 5px; }
         .result-card {
             background: #ffffff;
             border: 1px solid var(--border-color);
@@ -134,197 +190,353 @@
             padding: 18px;
             margin-bottom: 12px;
             text-align: left;
-            transition: all 0.2s ease;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 10px; }
+        .result-card h3 { margin: 0; font-size: 16px; font-weight: 600; }
+        .version-badge { background: #dbeafe; color: var(--secondary-color); padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 12px; }
+        .id-badge { display: inline-block; background: #f3f4f6; color: var(--text-muted); padding: 4px 8px; border-radius: 6px; font-family: monospace; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+        .result-card p { color: var(--text-muted); margin: 0; font-size: 14px; }
+        .card-footer { margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; }
+        .btn-pdf { background-color: var(--danger-color); color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
 
-        .result-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.06);
-            border-left-color: var(--primary-color);
-        }
+        .mensaje { text-align: center; font-weight: bold; margin-top: 15px; padding: 12px; border-radius: 8px; display: none; font-size: 13px; }
+        .status-loading { text-align: center; font-size: 13px; font-weight: 500; margin-bottom: 15px; }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-            gap: 10px;
-        }
-
-        .result-card h3 {
-            margin: 0;
-            color: var(--text-main);
-            font-size: 17px;
-            font-weight: 600;
-            line-height: 1.3;
-        }
-
-        .version-badge {
-            background: #dbeafe;
-            color: var(--secondary-color);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 12px;
-            white-space: nowrap;
-        }
-
-        .id-badge {
-            display: inline-block;
-            background: #f3f4f6;
-            color: var(--text-muted);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .result-card p {
-            color: var(--text-muted);
-            margin: 0;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .message {
-            text-align: center;
-            color: var(--text-muted);
-            padding: 20px;
-            font-size: 15px;
-            background: #f8fafc;
-            border-radius: 10px;
-            border: 1px dashed #cbd5e1;
-        }
-
-        .status-loading {
-            text-align: center;
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            font-style: italic;
-        }
-
-        /* ==========================================
-           NUEVO: ESTILOS PARA EL BOTÓN DE PDF
-           ========================================== */
-        .card-footer {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .btn-pdf {
-            background-color: #ef4444; /* Color rojo */
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-decoration: none; 
-            font-size: 14px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: background 0.2s;
-        }
-
-        .btn-pdf:hover {
-            background-color: #dc2626; /* Rojo más oscuro al pasar el mouse */
-        }
-
-        /* ==========================================
-           AJUSTES PARA CELULARES (DISEÑO RESPONSIVO)
-           ========================================== */
         @media (max-width: 600px) {
-            body {
-                padding: 10px;
-                align-items: flex-start; 
-                margin-top: 20px;
-            }
-            .header {
-                padding: 25px 20px;
-            }
-            .search-section {
-                padding: 20px;
-            }
-            .search-box {
-                flex-direction: column; 
-            }
-            button {
-                padding: 14px;
-                justify-content: center; 
-                width: 100%;
-            }
-            .card-header {
-                flex-direction: column; 
-                gap: 5px;
-            }
-            .version-badge {
-                align-self: flex-start;
-            }
+            .search-box-pets { flex-direction: column; }
+            .search-box-pets button { width: 100%; padding: 14px; }
+            .card-header { flex-direction: column; }
+            .version-badge { align-self: flex-start; }
         }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <div class="header">
-            <h2>Buscador de PETS</h2>
-            <p>Consulta rápida de Procedimientos y Versiones</p>
+        
+        <div id="menuPrincipal" class="contenedor-activo">
+            <div class="header">
+                <h2>Portal de Mantenimiento</h2>
+                <p>Seleccione una herramienta</p>
+            </div>
+            <div class="menu-body">
+                <div class="botones-menu">
+                    <button class="btn-menu" onclick="mostrarSeccion('seccionRegistro')">
+                        <span class="menu-icon">⏱️</span> 
+                        <span>Registrar Horas de Campo</span>
+                    </button>
+                    <button class="btn-menu" onclick="mostrarSeccion('seccionPets')">
+                        <span class="menu-icon">📄</span> 
+                        <span>Buscador de PETS</span>
+                    </button>
+                    <button class="btn-menu" onclick="mostrarSeccion('seccionObservaciones')">
+                        <span class="menu-icon">⚠️</span> 
+                        <span>Reportar Observación</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div class="search-section">
-            <div id="loadingStatus" class="status-loading">Conectando con la base de datos...</div>
+        <div id="seccionRegistro" class="contenedor-oculto">
+            <div class="header">
+                <button class="btn-volver" onclick="mostrarSeccion('menuPrincipal')">⬅️ Volver</button>
+                <h2>Registro de Actividades</h2>
+                <p>Control de horas y equipos</p>
+            </div>
             
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Ej. PETS-MANT-015, bomba, o solo '15'" onkeyup="checkEnter(event)">
-                <button onclick="searchData()">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    Buscar
-                </button>
-            </div>
+            <div class="seccion-body">
+                <label>Fecha (DD/MM/YYYY):</label>
+                <input type="text" id="fecha" placeholder="Ej: 27/05/2026">
 
-            <div class="result-container" id="result">
-                <div class="message">Ingresa un parámetro para comenzar la búsqueda.</div>
+                <label>Equipo Principal:</label>
+                <input type="text" id="equipo" list="listaEquipos" placeholder="Buscar o escribir equipo...">
+                <datalist id="listaEquipos"></datalist>
+
+                <label>TAG del Equipo:</label>
+                <input type="text" id="tag" list="listaTags" placeholder="Buscar o escribir TAG...">
+                <datalist id="listaTags"></datalist>
+
+                <label>Tipo de Actividad:</label>
+                <select id="area">
+                    <option value="" disabled selected>--- Seleccione Tipo ---</option>
+                    <option value="OPERACION">OPERACION</option>
+                    <option value="MECANICO">MECANICO</option>
+                    <option value="ELECTRICO">ELECTRICO</option>
+                    <option value="ADICIONALES">ADICIONALES</option>
+                </select>
+
+                <label>Descripción de Tarea:</label>
+                <input type="text" id="actividad" placeholder="Describa la tarea">
+
+                <label>Número de Técnicos:</label>
+                <input type="text" id="tecnicos" placeholder="Cantidad de personal">
+
+                <label>Hora Inicio (HH:MM:SS):</label>
+                <input type="text" id="horaInicio" placeholder="Ej: 08:00:00"> 
+
+                <label>Hora Final (HH:MM:SS):</label>
+                <input type="text" id="horaFin" placeholder="Ej: 16:30:00"> 
+
+                <button id="btnEnviar" class="btn-accion" onclick="finalizarRegistro()">GUARDAR REGISTRO</button>
+                <button class="btn-secundario" onclick="limpiarFiltrosActivos()">Limpiar Selección de Activos</button>
+                
+                <div id="txtMensaje" class="mensaje"></div>
             </div>
         </div>
+
+        <div id="seccionPets" class="contenedor-oculto">
+            <div class="header">
+                <button class="btn-volver" onclick="mostrarSeccion('menuPrincipal')">⬅️ Volver</button>
+                <h2>Buscador de PETS</h2>
+                <p>Consulta de Procedimientos Seguros</p>
+            </div>
+            
+            <div class="seccion-body">
+                <div id="loadingStatus" class="status-loading">Conectando con la base de datos...</div>
+                
+                <div class="search-box-pets">
+                    <input type="text" id="searchInput" placeholder="Ej. bomba, o '15'" onkeyup="checkEnter(event)">
+                    <button class="btn-accion" onclick="searchData()">Buscar</button>
+                </div>
+
+                <div class="result-container" id="result">
+                    <div class="mensaje" style="display:block; background:#f8fafc; color:#64748b; font-weight:normal;">
+                        Ingresa un parámetro para comenzar la búsqueda.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="seccionObservaciones" class="contenedor-oculto">
+            <div class="header">
+                <button class="btn-volver" onclick="mostrarSeccion('menuPrincipal')">⬅️ Volver</button>
+                <h2>Reportar Observación</h2>
+                <p>Notificación de hallazgos en campo</p>
+            </div>
+            
+            <div class="seccion-body">
+                <div class="mensaje" style="display:block; background:#fffbeb; color:#b45309;">
+                    🚧 Módulo en construcción. Aquí irá el formulario para reportar observaciones y hallazgos.
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // Tu Google Sheet publicado como CSV:
-        const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvcMllPVy-RxADzwap-cCbUvLpUcxob7LAUyX8SZbkAwCoqU0-uZ9Mubmm_olLxLKVfJ-jbsKggMoU/pub?gid=0&single=true&output=csv";
+        // ==========================================
+        // LÓGICA GENERAL (NAVEGACIÓN)
+        // ==========================================
+        function mostrarSeccion(idSeccionDestino) {
+            const secciones = ['menuPrincipal', 'seccionRegistro', 'seccionPets', 'seccionObservaciones'];
+            secciones.forEach(id => {
+                document.getElementById(id).classList.remove('contenedor-activo');
+                document.getElementById(id).classList.add('contenedor-oculto');
+            });
+            document.getElementById(idSeccionDestino).classList.remove('contenedor-oculto');
+            document.getElementById(idSeccionDestino).classList.add('contenedor-activo');
+        }
 
-        let sheetData = [];
+        // ==========================================
+        // LÓGICA DE SECCIÓN: REGISTRO DE HORAS
+        // ==========================================
+        const URL_EXCEL_ONLINE = "https://script.google.com/macros/s/AKfycbzKuiAHOf867JZqwBN3bRCFiuZHlRZW0C3N_pu-KpbqEMmbRAj28kCJAi9gO-E7aJ7I/exec"; 
 
-        // Cargar y parsear CSV
-        Papa.parse(csvUrl, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                sheetData = results.data;
-                document.getElementById("loadingStatus").innerHTML = `✅ Base de datos lista (${sheetData.length} registros)`;
-                document.getElementById("loadingStatus").style.color = "#16a34a"; // Verde
-            },
-            error: function(err) {
-                console.error("Error al cargar CSV:", err);
-                document.getElementById("loadingStatus").innerHTML = "❌ Error al conectar con la base de datos.";
-                document.getElementById("loadingStatus").style.color = "#dc2626"; // Rojo
+        let maestroEquipos = {
+            "ANTIINCRUSTANTE F1 - SALA QUIMICOS F1": ["P-902-F1", "P-902-F2"],
+            "COMPRESOR DE AIRE CENTRAL": ["C-101-A"],
+            "BOMBA DE AGUA DE PROCESO": ["B-305", "B-306"]
+        };
+
+        const inputFecha = document.getElementById("fecha");
+        const inputEquipo = document.getElementById("equipo");
+        const inputTag = document.getElementById("tag");
+        const inputArea = document.getElementById("area");
+        const inputActividad = document.getElementById("actividad");
+        const inputTecnicos = document.getElementById("tecnicos");
+        const inputHoraInicio = document.getElementById("horaInicio");
+        const inputHoraFin = document.getElementById("horaFin");
+        const btnEnviar = document.getElementById("btnEnviar");
+        const txtMensaje = document.getElementById("txtMensaje");
+
+        function mostrarMensajeRegistro(texto, color, fondo) {
+            txtMensaje.style.display = "block";
+            txtMensaje.innerText = texto;
+            txtMensaje.style.color = color;
+            txtMensaje.style.backgroundColor = fondo;
+        }
+
+        // Inicializar datos de registro al cargar la ventana
+        window.addEventListener('load', function() {
+            const hoy = new Date();
+            inputFecha.value = hoy.toLocaleDateString('es-PE');
+            const ahora = hoy.toLocaleTimeString('es-PE', { hour12: false });
+            inputHoraInicio.value = ahora;
+            inputHoraFin.value = ahora;
+
+            if (URL_EXCEL_ONLINE === "TU_URL_DE_APPS_SCRIPT_AQUI" || URL_EXCEL_ONLINE === "") {
+                mostrarMensajeRegistro("Modo de prueba local activa.", "#856404", "#fff3cd");
+                inicializarBuscadores(maestroEquipos);
+            } else {
+                mostrarMensajeRegistro("Sincronizando activos con Excel...", "var(--secondary-color)", "#dbeafe");
+                inputEquipo.disabled = true;
+                inputTag.disabled = true;
+
+                fetch(URL_EXCEL_ONLINE)
+                .then(res => res.json())
+                .then(datos => {
+                    maestroEquipos = datos;
+                    inicializarBuscadores(maestroEquipos);
+                    mostrarMensajeRegistro("✅ Activos sincronizados", "var(--success-color)", "#dcfce7");
+                    setTimeout(() => { txtMensaje.style.display = "none"; }, 2000);
+                })
+                .catch(err => {
+                    mostrarMensajeRegistro("❌ Error de red. Usando respaldo.", "var(--danger-color)", "#fee2e2");
+                    inicializarBuscadores(maestroEquipos);
+                });
             }
         });
 
-        // Permite buscar al presionar la tecla Enter
-        function checkEnter(event) {
-            if (event.key === "Enter") {
-                searchData();
+        function obtenerTodosLosTags(lista) {
+            let tags = [];
+            Object.values(lista).forEach(arr => {
+                arr.forEach(t => { if(!tags.includes(t)) tags.push(t); });
+            });
+            return tags;
+        }
+
+        function llenarDatalist(idElemento, elementos) {
+            const dl = document.getElementById(idElemento);
+            dl.innerHTML = "";
+            elementos.forEach(item => { dl.innerHTML += `<option value="${item}"></option>`; });
+        }
+
+        function inicializarBuscadores(lista) {
+            llenarDatalist("listaEquipos", Object.keys(lista));
+            llenarDatalist("listaTags", obtenerTodosLosTags(lista));
+            inputEquipo.disabled = false;
+            inputTag.disabled = false;
+        }
+
+        inputEquipo.addEventListener("input", function() {
+            const val = inputEquipo.value;
+            if (val === "") {
+                llenarDatalist("listaTags", obtenerTodosLosTags(maestroEquipos));
+                return;
             }
+            if (maestroEquipos[val]) {
+                const tagsDelEquipo = maestroEquipos[val];
+                llenarDatalist("listaTags", tagsDelEquipo);
+                if (tagsDelEquipo.length === 1) inputTag.value = tagsDelEquipo[0];
+            } else {
+                let tagsFiltrados = [];
+                Object.keys(maestroEquipos).forEach(eq => {
+                    if (eq.toLowerCase().includes(val.toLowerCase())) {
+                        maestroEquipos[eq].forEach(t => { if(!tagsFiltrados.includes(t)) tagsFiltrados.push(t); });
+                    }
+                });
+                llenarDatalist("listaTags", tagsFiltrados);
+            }
+        });
+
+        inputTag.addEventListener("input", function() {
+            const val = inputTag.value;
+            if (val === "") {
+                llenarDatalist("listaEquipos", Object.keys(maestroEquipos));
+                return;
+            }
+            let equiposCoincidentes = [];
+            let coincidenciaExactaEquipo = null;
+
+            Object.keys(maestroEquipos).forEach(eq => {
+                let contieneTagParcial = false;
+                maestroEquipos[eq].forEach(t => {
+                    if (t.toLowerCase().includes(val.toLowerCase())) contieneTagParcial = true;
+                    if (t === val) coincidenciaExactaEquipo = eq;
+                });
+                if (contieneTagParcial) equiposCoincidentes.push(eq);
+            });
+
+            llenarDatalist("listaEquipos", equiposCoincidentes);
+            if (coincidenciaExactaEquipo) inputEquipo.value = coincidenciaExactaEquipo;
+        });
+
+        function limpiarFiltrosActivos() {
+            inputEquipo.value = "";
+            inputTag.value = "";
+            inicializarBuscadores(maestroEquipos);
+        }
+
+        function finalizarRegistro() {
+            if (!inputFecha.value || !inputEquipo.value || !inputTag.value || !inputArea.value || !inputActividad.value || !inputTecnicos.value || !inputHoraInicio.value || !inputHoraFin.value) {
+                return alert("Por favor, llene absolutamente todos los campos antes de terminar.");
+            }
+
+            const datosFinales = {
+                fecha: inputFecha.value,
+                equipo: inputEquipo.value,
+                tag: inputTag.value,
+                area: inputArea.value, 
+                actividad: inputActividad.value,
+                tecnicos: inputTecnicos.value,
+                horaInicio: inputHoraInicio.value,
+                horaFin: inputHoraFin.value
+            };
+
+            btnEnviar.disabled = true;
+            mostrarMensajeRegistro("⏳ Guardando registro...", "#856404", "#fef08a");
+
+            fetch(URL_EXCEL_ONLINE, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(datosFinales)
+            }).then(() => {
+                alert("¡Registro enviado y guardado correctamente!");
+                limpiarFiltrosActivos();
+                inputArea.value = ""; 
+                const hoy = new Date();
+                inputFecha.value = hoy.toLocaleDateString('es-PE');
+                const ahora = hoy.toLocaleTimeString('es-PE', { hour12: false });
+                inputHoraInicio.value = ahora;
+                inputHoraFin.value = ahora;
+                btnEnviar.disabled = false;
+                txtMensaje.style.display = "none";
+            }).catch(err => {
+                alert("Error al conectar con el servidor.");
+                btnEnviar.disabled = false;
+                txtMensaje.style.display = "none";
+            });
+        }
+
+
+        // ==========================================
+        // LÓGICA DE SECCIÓN: BUSCADOR DE PETS
+        // ==========================================
+        const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQvcMllPVy-RxADzwap-cCbUvLpUcxob7LAUyX8SZbkAwCoqU0-uZ9Mubmm_olLxLKVfJ-jbsKggMoU/pub?gid=0&single=true&output=csv";
+        let sheetData = [];
+
+        window.addEventListener('load', function() {
+            Papa.parse(csvUrl, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    sheetData = results.data;
+                    document.getElementById("loadingStatus").innerHTML = `✅ Base de datos lista (${sheetData.length} registros)`;
+                    document.getElementById("loadingStatus").style.color = "var(--success-color)";
+                },
+                error: function(err) {
+                    console.error("Error al cargar CSV:", err);
+                    document.getElementById("loadingStatus").innerHTML = "❌ Error al conectar con la base de datos.";
+                    document.getElementById("loadingStatus").style.color = "var(--danger-color)";
+                }
+            });
+        });
+
+        function checkEnter(event) {
+            if (event.key === "Enter") searchData();
         }
 
         function searchData() {
@@ -333,24 +545,20 @@
             resultDiv.innerHTML = "";
 
             if (!query) {
-                resultDiv.innerHTML = "<div class='message'>⚠️ Por favor, ingresa un ID o palabra clave.</div>";
+                resultDiv.innerHTML = "<div class='mensaje' style='display:block; background:#f8fafc; color:#64748b;'>⚠️ Por favor, ingresa un ID o palabra clave.</div>";
                 return;
             }
 
-            // Filtro inteligente (Separa números de letras)
             const matches = sheetData.filter(item => {
                 let idMatch = false;
                 let temaMatch = false;
-                
                 const esNumero = !isNaN(query) && query.trim() !== "";
 
                 if (item.ID) {
                     const idString = item.ID.toString().toLowerCase();
                     if (esNumero) {
                         const numeroDelID = parseInt(idString.replace(/\D/g, ''), 10);
-                        if (numeroDelID === parseInt(query, 10)) {
-                            idMatch = true;
-                        }
+                        if (numeroDelID === parseInt(query, 10)) idMatch = true;
                     } else {
                         idMatch = idString.includes(query);
                     }
@@ -359,35 +567,24 @@
                 if (!esNumero && item.Tema) {
                     temaMatch = item.Tema.toString().toLowerCase().includes(query);
                 }
-                
                 return idMatch || temaMatch;
             });
 
-            // Mostrar resultados
             if (matches.length === 0) {
-                resultDiv.innerHTML = "<div class='message'>❌ No se encontraron procedimientos con ese criterio.</div>";
+                resultDiv.innerHTML = "<div class='mensaje' style='display:block; background:#fee2e2; color:#dc2626;'>❌ No se encontraron procedimientos.</div>";
             } else {
                 matches.forEach(item => {
                     const version = item.Version || item.Versión || item.version || "N/A";
-                    
-                    // NUEVO: Buscamos si hay un link en la columna "Enlace" del Excel
                     const enlacePDF = item.Enlace || item.Link || "";
                     let botonHTML = "";
                     
-                    // Si el excel tiene un link guardado, armamos el botón rojo
                     if (enlacePDF !== "") {
                         botonHTML = `
                         <div class="card-footer">
-                            <a href="${enlacePDF}" target="_blank" class="btn-pdf">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M4 0h5.293A1 1 0 0 1 10 .293L13.707 4a1 1 0 0 1 .293.707V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zm5.5 1.5v2a1 1 0 0 0 1 1h2l-3-3zM4.5 6a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1h-7zm0 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4z"/>
-                                </svg>
-                                Abrir PDF
-                            </a>
+                            <a href="${enlacePDF}" target="_blank" class="btn-pdf">Abrir PDF</a>
                         </div>`;
                     }
 
-                    // Imprimimos la tarjeta completa
                     resultDiv.innerHTML += `
                         <div class="result-card">
                             <div class="card-header">
@@ -405,3 +602,5 @@
     </script>
 </body>
 </html>
+
+```
